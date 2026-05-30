@@ -1,0 +1,103 @@
+# scenario_3.yaml — Asymmetric Load
+# 10 buses going Bengaluru→Kochi (every 15 min),
+# only 4 buses going Kochi→Bengaluru (every 35 min).
+# Tests how scheduler handles uneven traffic across directions.
+# Expected: KB buses mostly find clear chargers, BK buses bear most contention.
+
+scenario_id: scenario_3_asymmetric_load
+description: "10 buses BLR to KCH, only 4 buses KCH to BLR. Uneven directional traffic."
+world_id: blr_kochi_v1
+
+weights:
+  individual: 1.0
+  operator: 1.0
+  overall: 1.0
+
+rule_overrides: {}
+
+buses:
+  # Bengaluru → Kochi (full fleet, 15 min spacing)
+  - id: bus-BK-01
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "19:00"
+
+  - id: bus-BK-02
+    operator: freshbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:15"
+
+  - id: bus-BK-03
+    operator: flixbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:30"
+
+  - id: bus-BK-04
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "19:45"
+
+  - id: bus-BK-05
+    operator: freshbus
+    origin: bengaluru
+    destination: kochi
+    departure: "20:00"
+
+  - id: bus-BK-06
+    operator: flixbus
+    origin: bengaluru
+    destination: kochi
+    departure: "20:15"
+
+  - id: bus-BK-07
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "20:30"
+
+  - id: bus-BK-08
+    operator: freshbus
+    origin: bengaluru
+    destination: kochi
+    departure: "20:45"
+
+  - id: bus-BK-09
+    operator: flixbus
+    origin: bengaluru
+    destination: kochi
+    departure: "21:00"
+
+  - id: bus-BK-10
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "21:15"
+
+  # Kochi → Bengaluru (reduced fleet, 35 min spacing)
+  - id: bus-KB-01
+    operator: freshbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:00"
+
+  - id: bus-KB-02
+    operator: flixbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:35"
+
+  - id: bus-KB-03
+    operator: kpn
+    origin: kochi
+    destination: bengaluru
+    departure: "20:10"
+
+  - id: bus-KB-04
+    operator: freshbus
+    origin: kochi
+    destination: bengaluru
+    departure: "20:45"

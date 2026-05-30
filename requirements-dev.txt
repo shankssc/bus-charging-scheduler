@@ -1,0 +1,7 @@
+# Dev-only tools — not installed on Streamlit Community Cloud
+# Install locally with: pip install -r requirements-dev.txt
+-r requirements.txt
+
+ruff>=0.4.0        # linting + formatting
+mypy>=1.9.0        # static type checking
+types-PyYAML>=6.0  # mypy stubs for pyyaml

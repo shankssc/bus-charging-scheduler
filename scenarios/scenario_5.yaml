@@ -1,0 +1,140 @@
+# scenario_5.yaml — Worst Case Convergence
+# All 20 buses dispatched within a 72-minute window (every 8 min) from both ends.
+# By the time buses reach inner stations (B and C), they collide.
+# Maximum contention — highest expected wait times of all scenarios.
+# Expected: plan assigner spreads load across all 4 stations.
+# Scoring function works hardest to distribute pain fairly.
+
+scenario_id: scenario_5_worst_case_convergence
+description: "All 20 buses within 72 min window from both ends. Maximum contention."
+world_id: blr_kochi_v1
+
+weights:
+  individual: 1.0
+  operator: 1.0
+  overall: 1.0
+
+rule_overrides: {}
+
+buses:
+  # Bengaluru → Kochi
+  - id: bus-BK-01
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "19:00"
+
+  - id: bus-BK-02
+    operator: freshbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:08"
+
+  - id: bus-BK-03
+    operator: flixbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:16"
+
+  - id: bus-BK-04
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "19:24"
+
+  - id: bus-BK-05
+    operator: freshbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:32"
+
+  - id: bus-BK-06
+    operator: flixbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:40"
+
+  - id: bus-BK-07
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "19:48"
+
+  - id: bus-BK-08
+    operator: freshbus
+    origin: bengaluru
+    destination: kochi
+    departure: "19:56"
+
+  - id: bus-BK-09
+    operator: flixbus
+    origin: bengaluru
+    destination: kochi
+    departure: "20:04"
+
+  - id: bus-BK-10
+    operator: kpn
+    origin: bengaluru
+    destination: kochi
+    departure: "20:12"
+
+  # Kochi → Bengaluru
+  - id: bus-KB-01
+    operator: freshbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:00"
+
+  - id: bus-KB-02
+    operator: flixbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:08"
+
+  - id: bus-KB-03
+    operator: kpn
+    origin: kochi
+    destination: bengaluru
+    departure: "19:16"
+
+  - id: bus-KB-04
+    operator: freshbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:24"
+
+  - id: bus-KB-05
+    operator: flixbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:32"
+
+  - id: bus-KB-06
+    operator: kpn
+    origin: kochi
+    destination: bengaluru
+    departure: "19:40"
+
+  - id: bus-KB-07
+    operator: freshbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:48"
+
+  - id: bus-KB-08
+    operator: flixbus
+    origin: kochi
+    destination: bengaluru
+    departure: "19:56"
+
+  - id: bus-KB-09
+    operator: kpn
+    origin: kochi
+    destination: bengaluru
+    departure: "20:04"
+
+  - id: bus-KB-10
+    operator: freshbus
+    origin: kochi
+    destination: bengaluru
+    departure: "20:12"

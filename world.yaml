@@ -1,0 +1,173 @@
+# world.yaml — Physical world definition
+# This file describes the static world: route, stations, operators, and defaults.
+# It never changes between scenarios. Scenarios override only what differs.
+#
+# Design principles:
+#   - All physical constants live here as defaults, overrideable at segment or bus level
+#   - Adding a station = adding a stop + segment entry, zero code changes
+#   - Adding an operator = adding an entry to the operators list, zero code changes
+#   - Adding a rule = adding an entry to the rules list, zero code changes
+
+world_id: blr_kochi_v1
+description: "Bengaluru to Kochi intercity electric bus corridor"
+
+# ---------------------------------------------------------------------------
+# Physical defaults
+# All values are overrideable at the segment level (speed_kmph)
+# or at the bus level (battery_range_km, charge_duration_min)
+# ---------------------------------------------------------------------------
+defaults:
+  speed_kmph: 60 # default travel speed across all segments
+  battery_range_km: 240 # full charge range for all buses
+  charge_duration_min: 25 # time to charge to full at any station
+  cooldown_min: 0 # charger cooldown after a bus departs (default: none)
+
+# ---------------------------------------------------------------------------
+# Route definition
+# stops:    ordered list from one terminus to the other
+#           kind: depot   = fully charges buses before departure, not a scheduling resource
+#           kind: charger = scheduling resource, buses may stop here to recharge
+#           chargers:     number of independent charger slots at this station
+#           charge_duration_min: optional override of world default
+#           cooldown_min: optional override of world default
+#
+# segments: ordered list of road segments between consecutive stops
+#           distance_km:  physical distance of this segment
+#           speed_kmph:   optional override of world default speed
+#           traffic_events: optional list of temporary speed reductions
+#             - reason:     human-readable label (roadwork, accident, etc.)
+#               speed_kmph: reduced speed during this window
+#               from_time:  start of event in HH:MM (24h)
+#               to_time:    end of event in HH:MM (24h)
+#
+# Note: direction is always derived from a bus's origin/destination
+# against this stop order. No hardcoded forward/reverse enum needed.
+# ---------------------------------------------------------------------------
+route:
+  id: blr_kochi_main
+  stops:
+    - id: bengaluru
+      kind: depot
+
+    - id: A
+      kind: charger
+      chargers: 1
+      # charge_duration_min: 25   # inherits world default
+      # cooldown_min: 0           # inherits world default
+
+    - id: B
+      kind: charger
+      chargers: 1
+
+    - id: C
+      kind: charger
+      chargers: 1
+
+    - id: D
+      kind: charger
+      chargers: 1
+
+    - id: kochi
+      kind: depot
+
+  segments:
+    - from: bengaluru
+      to: A
+      distance_km: 100
+      # speed_kmph: 60            # inherits world default
+      # traffic_events: []        # no events by default
+
+    - from: A
+      to: B
+      distance_km: 120
+
+    - from: B
+      to: C
+      distance_km: 100
+
+    - from: C
+      to: D
+      distance_km: 120
+
+    - from: D
+      to: kochi
+      distance_km: 100
+
+# ---------------------------------------------------------------------------
+# Operators
+# priority_tier: standard | express | priority (future use)
+# max_wait_min:  SLA enforcement — null means no limit enforced
+# ---------------------------------------------------------------------------
+operators:
+  - id: kpn
+    priority_tier: standard
+    max_wait_min: null
+
+  - id: freshbus
+    priority_tier: standard
+    max_wait_min: null
+
+  - id: flixbus
+    priority_tier: standard
+    max_wait_min: null
+
+# ---------------------------------------------------------------------------
+# Rules registry
+# All known rules are listed here. Each rule can be enabled/disabled
+# globally here, or overridden per scenario via rule_overrides.
+#
+# Hard rules (range, charger capacity, route order) should never be disabled.
+# Soft rules contribute terms to the scoring function via weights.
+#
+# Adding a new rule = add an entry here + implement the Rule class.
+# Zero changes to the simulation engine.
+# ---------------------------------------------------------------------------
+rules:
+  - id: range_rule
+    kind: hard
+    enabled: true
+    description: "Bus must never exceed battery_range_km between consecutive charges"
+
+  - id: single_charger_rule
+    kind: hard
+    enabled: true
+    description: "At most N buses charging simultaneously (N = station charger count)"
+
+  - id: route_order_rule
+    kind: hard
+    enabled: true
+    description: "Bus must visit charging stations in route order, no backtracking"
+
+  - id: operator_fairness_rule
+    kind: soft
+    enabled: true
+    description: "Penalizes schedules where one operator's fleet is systematically delayed"
+
+  - id: priority_bus_rule
+    kind: soft
+    enabled: false
+    description: "Buses flagged priority: true always jump to front of queue"
+
+  - id: energy_cost_rule
+    kind: soft
+    enabled: false
+    description: "Penalizes charging during peak electricity cost windows (time-of-day pricing)"
+
+  - id: driver_shift_rule
+    kind: hard
+    enabled: false
+    description: "Bus cannot begin charging after shift_end_time (driver hours limit)"
+
+# ---------------------------------------------------------------------------
+# Objective weight defaults
+# These are the fallback weights used if a scenario does not specify its own.
+# Scenario files always take precedence over these defaults.
+#
+# individual: compensates buses that have accumulated more total wait time
+# operator:   compensates operators whose fleet is running behind on average
+# overall:    prioritizes buses with more remaining trip distance/time
+# ---------------------------------------------------------------------------
+objective_defaults:
+  individual: 1.0
+  operator: 1.0
+  overall: 1.0
