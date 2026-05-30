@@ -4,7 +4,7 @@ Event-driven simulation for scheduling electric bus charging along the Bengaluru
 
 ## Live App
 
-> Add your Streamlit Community Cloud URL here after deployment
+> [Live Streamlit Community Cloud Deployment URL](https://bus-charging-scheduler-cuutpzjvi2k4p8pzywr8bx.streamlit.app/)
 
 ## Running Locally
 
