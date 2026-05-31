@@ -49,26 +49,26 @@ A bus's travel direction is derived from `origin` and `destination` against the 
 
 This table covers every change that was anticipated during design. Each one is handled through data alone — no code changes required.
 
-| Change                                    | How handled                                                                                                                                                           |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **New charging station**                  | Add stop + segment to `world.yaml`. Plan generator, simulation, and UI adapt automatically.                                                                           |
-| **Multiple chargers at a station**        | Change `chargers: 1` to `chargers: N` on the stop in `world.yaml`. Simulation maintains N independent slots per station — no logic change.                            |
-| **Faster or slower charger at a station** | Add `charge_duration_min: N` override to the stop in `world.yaml`. Resolved via override chain.                                                                       |
-| **Cooldown period between buses**         | Add `cooldown_min: N` to the stop in `world.yaml`. Simulation schedules a `CHARGER_FREE` event after each charge instead of dispatching immediately.                  |
-| **Charger offline window**                | Add `offline_windows` list to stop in `world.yaml`. `DriverShiftRule` pattern extended to station availability.                                                       |
-| **Global speed change**                   | Update `speed_kmph` in `world.yaml` defaults. All travel times re-derived automatically.                                                                              |
-| **Per-segment speed**                     | Add `speed_kmph` override on the segment in `world.yaml`. Resolved before world default.                                                                              |
-| **Temporary traffic event**               | Add to `segment_overrides` in scenario YAML. `_resolve_speed()` checks traffic event windows by time.                                                                 |
-| **New operator**                          | Add entry to `operators` list in `world.yaml`. No code references operator names.                                                                                     |
-| **Priority buses**                        | Add `priority: true` to bus in scenario YAML. Enable `priority_bus_rule` in `world.yaml`. `PriorityBusRule` applies a large negative score modifier.                  |
-| **Different battery range per bus**       | Add `battery_range_km` override to the bus in scenario YAML. Resolved via override chain.                                                                             |
-| **New scenario**                          | New file in `scenarios/`. App loads all `scenario_*.yaml` files on startup.                                                                                           |
-| **Operator SLA (max wait)**               | Set `max_wait_min: N` on operator in `world.yaml`. Implement `OperatorSLARule` — pattern already shown in `rules.py`.                                                 |
-| **Time-of-day electricity costs**         | Enable `energy_cost_rule` in `world.yaml`. Add `cost_windows` to station data. `EnergyCostRule.score_modifier()` reads it. Stub already implemented.                  |
-| **Driver shift limits**                   | Enable `driver_shift_rule` in `world.yaml`. `DriverShiftRule.is_eligible()` blocks charging past shift end. Stub already implemented.                                 |
-| **Asymmetric scenario**                   | Just list fewer buses in one direction. Scenario 3 demonstrates this.                                                                                                 |
-| **Weight change**                         | Edit `weights` block in scenario YAML. One value, one place.                                                                                                          |
-| **More routes sharing stations**          | Add a second route to `world.yaml`. Stations referenced by ID — shared stations appear in both route definitions. Simulation processes all buses regardless of route. |
+| Change                                    | How handled                                                                                                                                                                                                                         |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **New charging station**                  | Add stop + segment to `world.yaml`. Plan generator, simulation, and UI adapt automatically.                                                                                                                                         |
+| **Multiple chargers at a station**        | Change `chargers: 1` to `chargers: N` on the stop in `world.yaml`. Simulation maintains N independent slots per station — no logic change.                                                                                          |
+| **Faster or slower charger at a station** | Add `charge_duration_min: N` override to the stop in `world.yaml`. Resolved via override chain.                                                                                                                                     |
+| **Cooldown period between buses**         | Add `cooldown_min: N` to the stop in `world.yaml`. Simulation schedules a `CHARGER_FREE` event after each charge instead of dispatching immediately.                                                                                |
+| **Charger offline window**                | Add `offline_windows` list to stop in `world.yaml`. `DriverShiftRule` pattern extended to station availability.                                                                                                                     |
+| **Global speed change**                   | Update `speed_kmph` in `world.yaml` defaults. All travel times re-derived automatically.                                                                                                                                            |
+| **Per-segment speed**                     | Add `speed_kmph` override on the segment in `world.yaml`. Resolved before world default.                                                                                                                                            |
+| **Temporary traffic event**               | Add to `segment_overrides` in scenario YAML. `_resolve_speed()` checks traffic event windows by time.                                                                                                                               |
+| **New operator**                          | Add entry to `operators` list in `world.yaml`. No code references operator names.                                                                                                                                                   |
+| **Priority buses**                        | Add `priority: true` to bus in scenario YAML. Enable `priority_bus_rule` in `world.yaml`. `PriorityBusRule` applies a large negative score modifier.                                                                                |
+| **Different battery range per bus**       | Add `battery_range_km` override to the bus in scenario YAML. Resolved via override chain.                                                                                                                                           |
+| **New scenario**                          | New file in `scenarios/`. App loads all `scenario_*.yaml` files on startup.                                                                                                                                                         |
+| **Operator SLA (max wait)**               | Set `max_wait_min: N` on operator in `world.yaml`. Implement `OperatorSLARule` — pattern already shown in `rules.py`.                                                                                                               |
+| **Time-of-day electricity costs**         | Enable `energy_cost_rule` in `world.yaml`. Add `cost_windows` to station data. `EnergyCostRule.score_modifier()` reads it. Stub already implemented.                                                                                |
+| **Driver shift limits**                   | Enable `driver_shift_rule` in `world.yaml`. `DriverShiftRule.is_eligible()` blocks charging past shift end. Stub already implemented.                                                                                               |
+| **Asymmetric scenario**                   | Just list fewer buses in one direction. Scenario 3 demonstrates this.                                                                                                                                                               |
+| **Weight change**                         | Edit `weights` block in scenario YAML. One value, one place.                                                                                                                                                                        |
+| **More routes sharing stations**          | Add a second route to `world.yaml`. Stations referenced by ID — shared stations appear in both route definitions. Plan generation would need a light extension to handle route-aware hop computation for buses on different routes. |
 
 ---
 
@@ -93,15 +93,15 @@ The simulation engine calls rules but never contains rule logic. Adding a new ru
 
 **Currently implemented rules:**
 
-| Rule                   | Kind | Status                                  |
-| ---------------------- | ---- | --------------------------------------- |
-| `RangeRule`            | Hard | Active (enforced at plan generation)    |
-| `SingleChargerRule`    | Hard | Active (enforced by slot management)    |
-| `RouteOrderRule`       | Hard | Active (enforced at plan generation)    |
-| `OperatorFairnessRule` | Soft | Active (via operator term in objective) |
-| `PriorityBusRule`      | Soft | Disabled (enable via world.yaml)        |
-| `DriverShiftRule`      | Hard | Disabled (enable via world.yaml)        |
-| `EnergyCostRule`       | Soft | Disabled (enable via world.yaml)        |
+| Rule                               | Kind | Status                                         |
+| ---------------------------------- | ---- | ---------------------------------------------- |
+| `RangeRule`                        | Hard | Active (enforced at plan generation)           |
+| `SingleChargerRule`                | Hard | Active (enforced by slot management)           |
+| `RouteOrderRule`                   | Hard | Active (enforced at plan generation)           |
+| Operator fairness (objective term) | Soft | Active (via `operator_term` in `objective.py`) |
+| `PriorityBusRule`                  | Soft | Disabled (enable via world.yaml)               |
+| `DriverShiftRule`                  | Hard | Disabled (enable via world.yaml)               |
+| `EnergyCostRule`                   | Soft | Disabled (enable via world.yaml)               |
 
 ---
 
@@ -163,7 +163,7 @@ Each bus could choose its next stop at departure time based on live queue length
 
 ## What I Would Do Next
 
-- **Per-bus charge duration resolution** — the simulation currently uses stop-level and world-level defaults. The `effective_charge_duration(bus, world, stop)` helper in `loader.py` supports bus-level overrides; wiring it through to the simulation is a small change.
+- **Per-bus charge duration resolution** — the data model already supports bus-level overrides via `effective_charge_duration(bus, world, stop)` in `loader.py`. Wiring it through the simulation is a small, isolated change.
 - **Dynamic plan selection** — as described above, the architecture supports it without engine changes.
 - **Operator SLA enforcement** — `max_wait_min` is already in the data model. Implementing `OperatorSLARule` follows the exact pattern of `DriverShiftRule`.
 - **Energy cost rule** — stub is implemented in `rules.py`. Needs `cost_windows` added to station data in `world.yaml` and the time-window check wired into `score_modifier()`.
